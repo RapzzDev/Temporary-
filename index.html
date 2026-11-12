@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blox Fruits Sea 1 Tracker</title>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+    margin:0;
+    padding:16px;
+    background:#10131b;
+    color:white;
+    font-family:Arial,sans-serif;
+}
+
+.container{
+    max-width:700px;
+    margin:auto;
+}
+
+h1{
+    text-align:center;
+    color:#50bfff;
+    margin-bottom:5px;
+}
+
+.subtitle{
+    text-align:center;
+    color:#999;
+    font-size:13px;
+}
+
+.box,.category{
+    background:#202736;
+    padding:15px;
+    border-radius:12px;
+    margin:15px 0;
+}
+
+#percentage{
+    text-align:center;
+    font-size:32px;
+    color:#50bfff;
+    font-weight:bold;
+}
+
+.progress{
+    height:12px;
+    background:#394252;
+    border-radius:20px;
+    overflow:hidden;
+}
+
+#bar{
+    height:100%;
+    width:0%;
+    background:#36c5ff;
+    transition:.3s;
+}
+
+#count{
+    text-align:center;
+    color:#aaa;
+}
+
+input[type=search]{
+    width:100%;
+    padding:14px;
+    border:0;
+    border-radius:8px;
+    background:#202736;
+    color:white;
+    margin:15px 0;
+    font-size:15px;
+}
+
+.category h2{
+    color:#50bfff;
+    font-size:18px;
+    margin-top:0;
+}
+
+.item{
+    padding:12px 3px;
+    border-bottom:1px solid #343d4c;
+}
+
+.row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.row input{
+    width:19px;
+    height:19px;
+    accent-color:#36c5ff;
+}
+
+.row span{
+    font-weight:bold;
+}
+
+input:checked + span{
+    text-decoration:line-through;
+    color:#777;
+}
+
+.info{
+    margin:7px 0 0 29px;
+    font-size:12px;
+    line-height:1.6;
+    color:#aaa;
+}
+
+button{
+    width:100%;
+    padding:13px;
+    border:0;
+    border-radius:8px;
+    margin-top:10px;
+    background:#168bd0;
+    color:white;
+    font-weight:bold;
+    font-size:14px;
+}
+
+.reset{
+    background:#b83b48;
+}
+
+select{
+    width:100%;
+    padding:12px;
+    border:0;
+    border-radius:8px;
+    background:#202736;
+    color:white;
+}
+
+#summary{
+    display:none;
+    width:100%;
+    min-height:250px;
+    background:#111722;
+    color:#bdeaff;
+    padding:12px;
+    margin-top:10px;
+    border-radius:8px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>🌊 BLOX FRUITS</h1>
+<p class="subtitle">FIRST SEA 100% COLLECTION TRACKER</p>
+
+<div class="box">
+
+<div id="percentage">0%</div>
+
+<div class="progress">
+<div id="bar"></div>
+</div>
+
+<p id="count">0 / 0 Completed</p>
+
+</div>
+
+<input type="search" id="search"
+placeholder="🔎 Cari item atau secret quest...">
+
+<select id="filter">
+<option value="all">Semua Item</option>
+<option value="incomplete">Belum Didapat</option>
+<option value="complete">Sudah Didapat</option>
+</select>
+
+<div id="checklist"></div>
+
+<button onclick="showSummary()">
+📋 LIHAT RANGKUMAN
+</button>
+
+<button onclick="copySummary()">
+📑 SALIN RANGKUMAN
+</button>
+
+<textarea id="summary"></textarea>
+
+<button class="reset" onclick="resetAll()">
+🔄 RESET CHECKLIST
+</button>
+
+</div>
+
+<script>
+
+const categories = {
+
+"🛡️ ACCESSORIES":[
+
+["Black Cape","Didapatkan dari Darkbeard? Tidak tersedia di First Sea. Tidak termasuk koleksi First Sea."],
+["Coat","Drop dari Vice Admiral di Marine Fortress."],
+["Cool Shades","Drop dari Cyborg di Fountain City."],
+["Pink Coat","Selesaikan rahasia Mysterious Key di Prison."],
+["Swordsman's Hat","Drop dari Chief Warden di Prison."],
+["Tomoe Ring","Dibeli dari Yoshi di Upper Skylands dengan persyaratan stat."],
+["Usoap's Hat","Didapatkan melalui persyaratan bounty tertentu."],
+["Marine Cap","Drop dari NPC Marine di Marine Fortress."]
+
+],
+
+"🥊 FIGHTING STYLES":[
+
+["Combat","Style awal yang dimiliki pemain."],
+["Dark Step","Beli dari Dark Step Teacher di Pirate Village."],
+["Electric","Beli dari Mad Scientist di Skylands."],
+["Water Kung Fu","Beli dari Water Kung-fu Teacher di Underwater City."]
+
+],
+
+"💎 MATERIALS":[
+
+["Leather","Drop dari berbagai NPC bajak laut."],
+["Scrap Metal","Drop dari NPC tertentu."],
+["Angel Wings","Drop dari NPC Skylands."],
+["Fish Tail","Drop dari NPC Fishman."],
+["Magma Ore","Drop dari NPC Magma Village."]
+
+],
+
+"📜 QUEST ITEMS":[
+
+["Torch","Tekan semua tombol tersembunyi di Jungle, lalu masuk ke ruangan rahasia."],
+["Cup","Ditemukan di rumah rusak Desert setelah menggunakan Torch."],
+["Ancient Relic","Kalahkan Mob Leader, lalu selesaikan permintaan Rich Man."],
+["Key","Diperoleh dari Military Detective untuk membuka pintu Ice Admiral."],
+["Grappling Hook","Ditemukan di Jungle untuk membantu menyelesaikan Zipline Repair."],
+["Treasure Map","Ditemukan melalui rahasia X Marks the Spot di Middle Town."],
+["Lightning Bolt","Ditemukan melalui rahasia Missing Lightning Bolt di Lower Skylands."]
+
+],
+
+"⚡ ABILITIES":[
+
+["Aura","Dibeli dari Ability Teacher."],
+["Instinct","Dibeli dari Instinct Teacher setelah memenuhi persyaratan."],
+["Air Jump","Dibeli dari Ability Teacher."],
+["Flash Step","Dibeli dari Ability Teacher."]
+
+],
+
+"🔐 SECRET QUESTS - MIDDLE TOWN":[
+
+["Early Access","Temukan Janus dan selesaikan tugas mengambil Sea Animation System."],
+["Lookout Duty","Selesaikan mini-game pengamatan kapal bersama Experienced Captain."],
+["X Marks the Spot","Temukan Treasure Map dan selesaikan pencarian harta karun."],
+["The Finale","Selesaikan seluruh secret quest lain, lalu ikuti urutan teleportasi pulau."]
+
+],
+
+"🌴 SECRET QUESTS - JUNGLE":[
+
+["Zipline Repair","Temukan Grappling Hook dan perbaiki zipline."],
+["The Thieving Monkey","Temukan jejak kaki, lalu cari topi milik Adventurer."],
+["Awakened Gorilla King","Selesaikan event Gorilla King yang terbangun."]
+
+],
+
+"🏴‍☠️ SECRET QUESTS - PIRATE VILLAGE":[
+
+["Free the Windmill","Selesaikan puzzle kincir angin."],
+["Tavern Brawl","Selesaikan kejadian di dalam Tavern."],
+["Awakened Chef","Selesaikan event Chef yang terbangun."]
+
+],
+
+"🏜️ SECRET QUESTS - DESERT":[
+
+["Save Hasan","Temukan jalan rahasia di dekat piramida dan selamatkan Hasan."],
+["Rune Cleanup","Bersihkan delapan monolit di sekitar kuil."],
+["Prickly Harvest","Kumpulkan sepuluh Cactus Petals."]
+
+],
+
+"❄️ SECRET QUESTS - FROZEN VILLAGE":[
+
+["Breaking the Ice","Bebaskan Ability Teacher dari balok es di dalam gua."],
+["Build a Snowman","Kumpulkan dan gabungkan tiga bola salju."],
+["Awakened Yeti","Selesaikan event Yeti yang terbangun."]
+
+],
+
+"⚓ SECRET QUESTS - MARINE FORTRESS":[
+
+["Raise the Flag","Temukan tali dan selesaikan mini-game menaikkan bendera."],
+["Pirate Raid","Selesaikan event serangan kapal bajak laut."],
+["Awakened Vice Admiral","Selesaikan event Vice Admiral yang terbangun."]
+
+],
+
+"☁️ SECRET QUESTS - LOWER SKYLANDS":[
+
+["Missing Lightning Bolt","Temukan Lightning Bolt dan bawa ke Mad Scientist."],
+["Return the Treasure","Temukan kode rahasia dan buka Angelic Vault."],
+["Unexpected Guest","Temukan awan rahasia dan selesaikan tantangan petinya."]
+
+],
+
+"🔒 SECRET QUESTS - PRISON":[
+
+["Prison Break","Temukan tiga tahanan yang mencoba melarikan diri."],
+["Mysterious Key","Temukan kunci rahasia dan selesaikan misteri Pink Coat."],
+["Awakened Warden","Selesaikan event Warden yang terbangun."]
+
+],
+
+"🏟️ SECRET QUESTS - COLOSSEUM":[
+
+["Gladiatorial Combat","Selesaikan tiga gelombang tantangan arena."],
+["Previous Champions","Selesaikan puzzle empat patung."],
+["Crowded Colosseum","Selesaikan tantangan target dalam batas waktu."]
+
+],
+
+"🌋 SECRET QUESTS - MAGMA VILLAGE":[
+
+["Magma Nest","Selesaikan event rahasia di geyser lava."],
+["Magma Ore Extraction","Selesaikan mini-game tambang Magma Village."],
+["Awakened Magma General","Selesaikan event Magma General yang terbangun."]
+
+],
+
+"🐟 SECRET QUESTS - UNDERWATER CITY":[
+
+["Ride the Bubble","Temukan gelembung rahasia dan Hidden Cove."],
+["Scattered Light","Selesaikan puzzle kristal cahaya."],
+["Awakened Fishman Lord","Selesaikan event Fishman Lord yang terbangun."]
+
+],
+
+"☁️ SECRET QUESTS - UPPER SKYLANDS":[
+
+["The Old Temple","Selesaikan puzzle menara energi di kuil."],
+["Awakened Sky Warlord","Selesaikan event Sky Warlord yang terbangun."],
+["Awakened Lightning God","Selesaikan event Lightning God yang terbangun."]
+
+],
+
+"🚢 SECRET QUESTS - FOUNTAIN CITY":[
+
+["Pipe Repairs","Selesaikan puzzle pipa air di air mancur."],
+["Sewer Gang","Temukan pintu masuk selokan dan selesaikan tantangannya."],
+["Awakened Cyborg","Selesaikan event Cyborg yang terbangun."]
+
+]
+
+};
+
+const storageKey="bloxSea1CompleteTracker";
+
+let saved={};
+
+try{
+    saved=JSON.parse(localStorage.getItem(storageKey)||"{}");
+}catch{
+    saved={};
+}
+
+const checklist=document.getElementById("checklist");
+
+function render(){
+
+    checklist.innerHTML="";
+
+    for(const [category,items] of Object.entries(categories)){
+
+        const section=document.createElement("div");
+        section.className="category";
+
+        const title=document.createElement("h2");
+        title.textContent=category;
+
+        section.appendChild(title);
+
+        items.forEach(([name,info])=>{
+
+            const item=document.createElement("div");
+            item.className="item";
+            item.dataset.name=(name+" "+info).toLowerCase();
+
+            const row=document.createElement("label");
+            row.className="row";
+
+            const checkbox=document.createElement("input");
+            checkbox.type="checkbox";
+            checkbox.checked=!!saved[name];
+
+            const span=document.createElement("span");
+            span.textContent=name;
+
+            checkbox.addEventListener("change",()=>{
+
+                saved[name]=checkbox.checked;
+
+                localStorage.setItem(
+                    storageKey,
+                    JSON.stringify(saved)
+                );
+
+                updateProgress();
+
+            });
+
+            row.append(checkbox,span);
+
+            const description=document.createElement("div");
+            description.className="info";
+            description.textContent="📍 "+info;
+
+            item.append(row,description);
+            section.appendChild(item);
+
+        });
+
+        checklist.appendChild(section);
+
+    }
+
+    updateProgress();
+    applyFilter();
+
+}
+
+function updateProgress(){
+
+    const all=Object.values(categories).flat();
+
+    const total=all.length;
+
+    const completed=all.filter(
+        item=>saved[item[0]]
+    ).length;
+
+    const percent=Math.round(completed/total*100);
+
+    document.getElementById("percentage")
+    .textContent=percent+"%";
+
+    document.getElementById("bar")
+    .style.width=percent+"%";
+
+    document.getElementById("count")
+    .textContent=completed+" / "+total+" Completed";
+
+}
+
+function applyFilter(){
+
+    const query=document.getElementById("search")
+    .value.toLowerCase();
+
+    const filter=document.getElementById("filter").value;
+
+    document.querySelectorAll(".item").forEach(item=>{
+
+        const checkbox=item.querySelector("input");
+
+        const matchName=item.dataset.name.includes(query);
+
+        const matchStatus=
+            filter==="all" ||
+            (filter==="complete" && checkbox.checked) ||
+            (filter==="incomplete" && !checkbox.checked);
+
+        item.style.display=
+            matchName && matchStatus ? "block":"none";
+
+    });
+
+    document.querySelectorAll(".category").forEach(section=>{
+
+        const visible=[...section.querySelectorAll(".item")]
+        .some(item=>item.style.display!=="none");
+
+        section.style.display=visible?"block":"none";
+
+    });
+
+}
+
+document.getElementById("search")
+.addEventListener("input",applyFilter);
+
+document.getElementById("filter")
+.addEventListener("change",applyFilter);
+
+function generateSummary(){
+
+    let result="BLOX FRUITS SEA 1 COLLECTION\n\n";
+
+    for(const [category,items] of Object.entries(categories)){
+
+        result+=category+"\n";
+
+        items.forEach(([name])=>{
+
+            result+=(saved[name]?"☑ ":"☐ ")+name+"\n";
+
+        });
+
+        result+="\n";
+
+    }
+
+    const all=Object.values(categories).flat();
+
+    const completed=all.filter(item=>saved[item[0]]).length;
+
+    result+=`PROGRESS: ${completed}/${all.length}`;
+
+    return result;
+
+}
+
+function showSummary(){
+
+    const box=document.getElementById("summary");
+
+    box.value=generateSummary();
+    box.style.display="block";
+
+}
+
+function copySummary(){
+
+    const box=document.getElementById("summary");
+
+    box.value=generateSummary();
+    box.style.display="block";
+
+    box.focus();
+    box.select();
+
+    try{
+
+        document.execCommand("copy");
+
+        alert("Rangkuman berhasil disalin!");
+
+    }catch{
+
+        alert("Tekan lama teks lalu pilih Salin.");
+
+    }
+
+}
+
+function resetAll(){
+
+    if(confirm("Hapus seluruh progres checklist?")){
+
+        saved={};
+
+        localStorage.removeItem(storageKey);
+
+        document.getElementById("summary").style.display="none";
+
+        render();
+
+    }
+
+}
+
+render();
+
+</script>
+
+</body>
+  </html>
